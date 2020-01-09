@@ -13,7 +13,7 @@ interface ApiInterface {
 
     companion object {
 
-        private var BASE_URL = "http://open-platform.theguardian.com"
+        private var BASE_URL = "https://content.guardianapis.com"
 
         fun create(): ApiInterface {
 
