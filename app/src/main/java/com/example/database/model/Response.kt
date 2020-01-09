@@ -1,9 +1,10 @@
 package com.example.database.model
 
+import com.example.database.database.Article
 import com.google.gson.annotations.SerializedName
 
-class Responce(
+class Response(
     @SerializedName("results")
-    var results: Results
+    var articles: List<Article>
 ) {
 }

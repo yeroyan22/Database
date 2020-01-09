@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         apiInterface.enqueue(object : Callback<ArticlesData> {
             override fun onResponse(call: Call<ArticlesData>, response: Response<ArticlesData>) {
                 if (response?.body() != null)
-                    recyclerAdapter.setData(response.body()!!)            }
+                    recyclerAdapter.setData(response.body()!!.response.articles)            }
 
             override fun onFailure(call: Call<ArticlesData>, t: Throwable) {
             }
