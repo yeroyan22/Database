@@ -10,6 +10,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.database.database.Article
+import com.example.database.model.ArticlesData
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -48,18 +49,12 @@ class MainActivity : AppCompatActivity() {
 
         val apiInterface = ApiInterface.create().getArticles()
 
-        apiInterface.enqueue(object : Callback<List<Article>> {
-            override fun onResponse(
-                call: Call<List<Article>>?,
-                response: Response<List<Article>>?
-            ) {
-
+        apiInterface.enqueue(object : Callback<ArticlesData> {
+            override fun onResponse(call: Call<ArticlesData>, response: Response<ArticlesData>) {
                 if (response?.body() != null)
-                    recyclerAdapter.setData(response.body()!!)
-            }
+                    recyclerAdapter.setData(response.body()!!)            }
 
-            override fun onFailure(call: Call<List<Article>>?, t: Throwable?) {
-
+            override fun onFailure(call: Call<ArticlesData>, t: Throwable) {
             }
         })
     }

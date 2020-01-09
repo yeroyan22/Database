@@ -1,6 +1,7 @@
 package com.example.database
 
 import com.example.database.database.Article
+import com.example.database.model.ArticlesData
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -9,7 +10,7 @@ import retrofit2.http.GET
 interface ApiInterface {
 
     @GET("/search?q=12%20years%20a%20slave&format=json&tag=film/film,tone/reviews&from-date=2010-01-01&show-tags=contributor&show-fields=starRating,headline,thumbnail,short-url&order-by=relevance&api-key=da3e84a8-a10c-403d-9817-863e081ee713")
-    fun getArticles(): Call<List<Article>>
+    fun getArticles(): Call<ArticlesData>
 
     companion object {
 
