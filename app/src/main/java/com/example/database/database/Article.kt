@@ -16,6 +16,9 @@ data class Article(
     var image: String,
     @ColumnInfo(name = "article_category")
     @SerializedName("sectionName")
-    var category: String
+    var category: String,
+    @ColumnInfo(name = "article_url")
+    @SerializedName("webUrl")
+    var url: String
 ) {
 }

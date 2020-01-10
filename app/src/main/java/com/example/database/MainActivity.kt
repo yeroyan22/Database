@@ -5,8 +5,6 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
 import com.example.database.database.ArticleDatabase
-import kotlinx.android.synthetic.main.activity_main.*
-import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.database.database.Article
@@ -14,12 +12,14 @@ import com.example.database.model.ArticlesData
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import android.content.Intent
+import android.net.Uri
 
 
-class MainActivity : AppCompatActivity() {
 
+
+
+class MainActivity : AppCompatActivity(),OnItemClickListener {
     private lateinit var model: ArticleViewModel
     lateinit var recyclerView: RecyclerView
     lateinit var recyclerAdapter: RecyclerViewAdapter
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         recyclerView = findViewById(R.id.recyclerView)
-        recyclerAdapter = RecyclerViewAdapter(this)
+        recyclerAdapter = RecyclerViewAdapter(this, this)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = recyclerAdapter
 
@@ -57,5 +57,11 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<ArticlesData>, t: Throwable) {
             }
         })
+    }
+
+    override fun onItemClicked(article: Article) {
+        val uri = Uri.parse(article.url)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(intent)
     }
 }
