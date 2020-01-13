@@ -16,7 +16,7 @@ class RecyclerViewAdapter(
     context: Context,
     var itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
-    var articles: List<Article> = listOf()
+    var articles: MutableList<Article> = mutableListOf()
 
 
 
@@ -50,7 +50,13 @@ class RecyclerViewAdapter(
     }
 
     fun setData(newData: List<Article>) {
-        this.articles = newData
+        this.articles.clear()
+        articles.addAll(newData)
+        notifyDataSetChanged()
+    }
+
+    fun addData(newData: List<Article>){
+        this.articles.addAll(newData)
         notifyDataSetChanged()
     }
 

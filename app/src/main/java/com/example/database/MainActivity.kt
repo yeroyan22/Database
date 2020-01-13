@@ -14,15 +14,23 @@ import retrofit2.Callback
 import retrofit2.Response
 import android.content.Intent
 import android.net.Uri
+import com.example.database.EndlessScroll as EndlessScroll
+import androidx.core.os.HandlerCompat.postDelayed
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.os.Handler
 
 
 
 
 
-class MainActivity : AppCompatActivity(),OnItemClickListener {
-    private lateinit var model: ArticleViewModel
+class MainActivity : AppCompatActivity(), OnItemClickListener {
     lateinit var recyclerView: RecyclerView
     lateinit var recyclerAdapter: RecyclerViewAdapter
+    lateinit var endlessScroll: EndlessScroll
+    lateinit var layoutManager: LinearLayoutManager
+    private var page: Int = 1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +39,8 @@ class MainActivity : AppCompatActivity(),OnItemClickListener {
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerAdapter = RecyclerViewAdapter(this, this)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = layoutManager
         recyclerView.adapter = recyclerAdapter
 
         val dataSource = ArticleDatabase.getInstance(application).articleDao()
@@ -47,16 +56,35 @@ class MainActivity : AppCompatActivity(),OnItemClickListener {
             recyclerAdapter.setData(articles)
         })
 
-        val apiInterface = ApiInterface.create().getArticles()
+        var apiInterface = ApiInterface.create().getArticles(page)
 
         apiInterface.enqueue(object : Callback<ArticlesData> {
             override fun onResponse(call: Call<ArticlesData>, response: Response<ArticlesData>) {
                 if (response?.body() != null)
-                    recyclerAdapter.setData(response.body()!!.response.articles)            }
+                    recyclerAdapter.setData(response.body()!!.response.articles)
+            }
 
             override fun onFailure(call: Call<ArticlesData>, t: Throwable) {
             }
         })
+
+        endlessScroll = object : EndlessScroll(layoutManager) {
+            override fun onLoadMore(pageNum: Int, recyclerView: RecyclerView) {
+                    apiInterface = ApiInterface.create().getArticles(pageNum+1)
+                    apiInterface.enqueue(object : Callback<ArticlesData> {
+                        override fun onResponse(call: Call<ArticlesData>, response: Response<ArticlesData>) {
+                            if (response?.body() != null)
+                                recyclerAdapter.addData(response.body()!!.response.articles)
+                        }
+
+                        override fun onFailure(call: Call<ArticlesData>, t: Throwable) {
+                        }
+                    })
+            }
+        }
+
+        recyclerView.addOnScrollListener(endlessScroll)
+
     }
 
     override fun onItemClicked(article: Article) {
@@ -64,4 +92,5 @@ class MainActivity : AppCompatActivity(),OnItemClickListener {
         val intent = Intent(Intent.ACTION_VIEW, uri)
         startActivity(intent)
     }
+
 }
