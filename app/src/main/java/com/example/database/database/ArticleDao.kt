@@ -20,4 +20,5 @@ interface ArticleDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllArticles(articleList: List<Article>)
+
 }

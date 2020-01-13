@@ -14,13 +14,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import android.content.Intent
 import android.net.Uri
+import android.widget.ImageView
+import com.example.database.database.ArticleDao
+import kotlinx.android.synthetic.main.recyclerview_item.*
 import com.example.database.EndlessScroll as EndlessScroll
-import androidx.core.os.HandlerCompat.postDelayed
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.os.Handler
-
 
 
 
@@ -30,7 +27,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     lateinit var recyclerAdapter: RecyclerViewAdapter
     lateinit var endlessScroll: EndlessScroll
     lateinit var layoutManager: LinearLayoutManager
-    private var page: Int = 1
+    var page: Int = 1
+    lateinit var dataSource: ArticleDao
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +40,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         layoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = recyclerAdapter
-
-        val dataSource = ArticleDatabase.getInstance(application).articleDao()
+        dataSource = ArticleDatabase.getInstance(application).articleDao()
 
         val viewModelFactory = ArticleViewModelFactory(dataSource, application = MyApplication())
 
@@ -53,7 +50,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
             ).get(ArticleViewModel::class.java)
 
         viewModel.getAllPosts().observe(this, Observer { articles ->
-            recyclerAdapter.setData(articles)
+            recyclerAdapter.addData(articles)
         })
 
         var apiInterface = ApiInterface.create().getArticles(page)
@@ -61,7 +58,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         apiInterface.enqueue(object : Callback<ArticlesData> {
             override fun onResponse(call: Call<ArticlesData>, response: Response<ArticlesData>) {
                 if (response?.body() != null)
-                    recyclerAdapter.setData(response.body()!!.response.articles)
+                    recyclerAdapter.addData(response.body()!!.response.articles)
             }
 
             override fun onFailure(call: Call<ArticlesData>, t: Throwable) {
@@ -93,4 +90,10 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         startActivity(intent)
     }
 
+    override fun onLikeClicked(article: Article) {
+        dataSource.update(article)
+    }
+
 }
+
+
