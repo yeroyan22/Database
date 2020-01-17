@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.database.database.ArticleDao
-import java.lang.Appendable
 
 class ArticleViewModelFactory(
     private val dataSource: ArticleDao,

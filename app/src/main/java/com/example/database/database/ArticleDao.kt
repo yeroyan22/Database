@@ -15,10 +15,16 @@ interface ArticleDao {
     @Delete
     fun delete(article: Article)
 
-    @Query("SELECT * from article_table")
+    @Query("DELETE FROM article_table")
+    fun deleteAll()
+
+    @Query("SELECT * FROM article_table")
     fun findAll(): LiveData<List<Article>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllArticles(articleList: List<Article>)
+
+    @Query("SELECT * FROM article_table")
+    fun getAll(): List<Article>
 
 }

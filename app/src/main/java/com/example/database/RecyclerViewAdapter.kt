@@ -1,94 +1,168 @@
 package com.example.database
 
-import android.app.Application
 import android.content.Context
-import android.content.res.Resources
-import android.media.Image
+import android.os.Handler
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import com.example.database.database.*
 
 import kotlinx.android.synthetic.main.recyclerview_item.view.*
-import com.example.database.database.Article
-import com.example.database.database.ArticleDao
-import com.example.database.database.ArticleDatabase
 import com.facebook.drawee.view.SimpleDraweeView
 
 class RecyclerViewAdapter(
     context: Context,
-    var itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+    var itemClickListener: OnItemClickListener
+) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
     var articles: MutableList<Article> = mutableListOf()
-    var likedArticles: MutableList<String> = mutableListOf()
-    var viewModel: ArticleViewModel? = null
-
-
+    private val TYPE_ARTICLE = 1
+    private val TYPE_OTHER = 2
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.recyclerview_item, parent, false)
-        return ViewHolder(view)
+        return if (viewType == TYPE_ARTICLE) {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.recyclerview_item, parent, false)
+            ViewHolder(view)
+        } else {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.recyclerview_item_second, parent, false)
+            SecondViewHolder(view)
+        }
+
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = articles[position]
-        holder.bind(item, itemClickListener)
+        if (getItemViewType(position) == TYPE_ARTICLE) {
+            val item = articles[position]
+            holder.bind(item, itemClickListener)
+        } else {
+            val item = articles[position]
+            (holder as SecondViewHolder).bindSecond(item, itemClickListener)
+        }
 
     }
 
     override fun getItemCount(): Int = articles.size
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.item_name
-        val image: SimpleDraweeView = itemView.item_image
-        val category: TextView = itemView.item_section
-        val delete: ImageView = itemView.image_delete
-        val like: ImageView = itemView.image_like
+    override fun getItemViewType(position: Int): Int {
+        return if (articles[position].type == "article") {
+            TYPE_ARTICLE
+        } else {
+            TYPE_OTHER
+        }
+    }
 
-        fun bind(article: Article,clickListener: OnItemClickListener){
+    open inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val title: TextView = itemView.item_name
+        private val image: SimpleDraweeView = itemView.item_image
+        private val category: TextView = itemView.item_section
+        private val delete: ImageView = itemView.image_delete
+        private val like: ImageView = itemView.image_like
+
+
+        fun bind(article: Article, clickListener: OnItemClickListener) {
             title.text = article.title
             image.setImageURI(article.fields!!.image)
             category.text = article.category
             itemView.setOnClickListener {
                 clickListener.onItemClicked(article)
             }
-            delete.setOnClickListener{
+            delete.setOnClickListener {
                 removeAt(adapterPosition)
+                clickListener.onDeleteClicked(article, true)
             }
-            like.setOnClickListener{
-                if(like.drawable.constantState == like.resources.getDrawable(R.drawable.like_disabled).constantState){
-                    like.setImageResource(R.drawable.like_enabled)
-                    likedArticles.add(articles[adapterPosition].id)
-                    clickListener.onLikeClicked(article)
-                }
-                else{
+            like.setOnClickListener {
+                if (article.isLiked) {
                     like.setImageResource(R.drawable.like_disabled)
-                    likedArticles.remove(articles[adapterPosition].id)
+                    clickListener.onLikedClicked(article, false)
+                } else {
+                    like.setImageResource(R.drawable.like_enabled)
+                    clickListener.onLikedClicked(article, true)
                 }
 
+            }
+            if (article.isLiked) {
+                like.setImageResource(R.drawable.like_enabled)
+            } else {
+                like.setImageResource(R.drawable.like_disabled)
+            }
+
+            if (article.isDeleted) {
+                removeAt(adapterPosition)
             }
         }
     }
 
-    fun addData(newData: List<Article>){
+    open inner class SecondViewHolder(itemView: View) : ViewHolder(itemView) {
+        private val title: TextView = itemView.item_name
+        private val image: SimpleDraweeView = itemView.item_image
+        private val category: TextView = itemView.item_section
+        private val delete: ImageView = itemView.image_delete
+        private val like: ImageView = itemView.image_like
+
+        fun bindSecond(article: Article, clickListener: OnItemClickListener) {
+            title.text = article.title
+            image.setImageURI(article.fields!!.image)
+            category.text = article.category
+            itemView.setOnClickListener {
+                clickListener.onItemClicked(article)
+            }
+            delete.setOnClickListener {
+                removeAt(adapterPosition)
+                clickListener.onDeleteClicked(article, true)
+            }
+            like.setOnClickListener {
+                if (article.isLiked) {
+                    like.setImageResource(R.drawable.like_disabled)
+                    clickListener.onLikedClicked(article, false)
+                } else {
+                    like.setImageResource(R.drawable.like_enabled)
+                    clickListener.onLikedClicked(article, true)
+                }
+
+            }
+            if (article.isLiked) {
+                like.setImageResource(R.drawable.like_enabled)
+            } else {
+                like.setImageResource(R.drawable.like_disabled)
+            }
+
+            if (article.isDeleted) {
+                removeAt(adapterPosition)
+            }
+        }
+    }
+
+
+    fun setData(newData: List<Article>) {
+        this.articles.clear()
+        this.articles.addAll(newData)
+        notifyDataSetChanged()
+    }
+
+    fun addData(newData: List<Article>) {
         this.articles.addAll(newData)
         notifyDataSetChanged()
     }
 
     fun removeAt(position: Int) {
         articles.removeAt(position)
-        notifyItemRemoved(position)
-        notifyItemRangeChanged(position, articles.size)
-    }
+        val handler = Handler()
+        handler.post {
+            notifyItemRemoved(position)
+            notifyItemRangeChanged(position, articles.size)
+        }
 
+    }
 }
-interface OnItemClickListener{
+
+interface OnItemClickListener {
     fun onItemClicked(article: Article)
-    fun onLikeClicked(article: Article)
+    fun onLikedClicked(article: Article, liked: Boolean)
+    fun onDeleteClicked(article: Article, deleted: Boolean)
 }

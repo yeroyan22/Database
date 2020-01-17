@@ -31,4 +31,10 @@ class ArticleViewModel(val database: ArticleDao, application: Application) :
     fun insertAllPosts(articleList: List<Article>) {
         return db.articleDao().insertAllArticles(articleList)
     }
+
+    fun getAll(): List<Article> {
+        return db.articleDao().getAll()
+    }
+
+
 }

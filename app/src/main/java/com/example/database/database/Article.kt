@@ -18,8 +18,15 @@ data class Article(
     var category: String,
     @ColumnInfo(name = "article_url")
     @SerializedName("webUrl")
-    var url: String
+    var url: String,
+    @ColumnInfo(name = "article_type")
+    @SerializedName("type")
+    var type: String
+
 ) {
+
+    var isLiked: Boolean = false
+    var isDeleted: Boolean = false
 
     @SerializedName("fields")
     @TypeConverters(FieldsConverter::class)
