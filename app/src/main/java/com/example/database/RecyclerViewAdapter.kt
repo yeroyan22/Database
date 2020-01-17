@@ -67,7 +67,9 @@ class RecyclerViewAdapter(
 
         fun bind(article: Article, clickListener: OnItemClickListener) {
             title.text = article.title
-            image.setImageURI(article.fields!!.image)
+            if (article.fields != null) {
+                image.setImageURI(article.fields!!.image)
+            }
             category.text = article.category
             itemView.setOnClickListener {
                 clickListener.onItemClicked(article)
@@ -107,7 +109,9 @@ class RecyclerViewAdapter(
 
         fun bindSecond(article: Article, clickListener: OnItemClickListener) {
             title.text = article.title
-            image.setImageURI(article.fields!!.image)
+            if (article.fields != null) {
+                image.setImageURI(article.fields!!.image)
+            }
             category.text = article.category
             itemView.setOnClickListener {
                 clickListener.onItemClicked(article)
